@@ -59,15 +59,19 @@ func (d *Downloader) DownloadAndRead(chapterID string, urls []string) error {
 	}
 
 	// 2. Create CBZ
-	cbzPath := filepath.Join(os.TempDir(), fmt.Sprintf("mangaka_chapter_%s.cbz", chapterID))
-	if err := d.createCBZ(cbzPath, files); err != nil {
-		return err
-	}
+	fmt.Printf("Opening with nsxiv...\n")
 
-	// 3. Open Zathura
-	fmt.Printf("Opening %s with Zathura...\n", cbzPath)
-	cmd := exec.Command("zathura", cbzPath)
-	return cmd.Start()
+    // Opção A: Passar a pasta inteira (O nsxiv ordena alfabeticamente: 001.jpg, 002.jpg...)
+    // O "-t" abre no modo galeria (thumbnail). Remova se quiser ver a imagem direto.
+    cmd := exec.Command("nsxiv","-f","-b","-s","w", tmpDir)
+    
+    // IMPORTANTE: Conectar o terminal para os atalhos de teclado do nsxiv funcionarem
+    cmd.Stdout = os.Stdout
+    cmd.Stderr = os.Stderr
+
+    // cmd.Start() roda em background e o programa Go pode fechar e apagar a pasta temporária
+    // enquanto ainda está lendo. O cmd.Run() faz o Go esperar você fechar a janela.
+    return cmd.Run()
 }
 
 func (d *Downloader) downloadFile(url, path string) error {

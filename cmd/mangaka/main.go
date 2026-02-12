@@ -1,10 +1,10 @@
 package main
 
 import (
-	"mangaka/internal/api"
-	"mangaka/internal/downloader"
-	"mangaka/internal/service"
-	"mangaka/internal/ui"
+	"github.com/dvsalvaya/mangaka/internal/api"
+	"github.com/dvsalvaya/mangaka/internal/downloader"
+	"github.com/dvsalvaya/mangaka/internal/service"
+	"github.com/dvsalvaya/mangaka/internal/ui"
 )
 
 func main() {

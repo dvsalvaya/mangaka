@@ -5,10 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"mangaka/pkg/models"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/dvsalvaya/mangaka/pkg/models"
 )
 
 var ErrNotFound = errors.New("resource not found")

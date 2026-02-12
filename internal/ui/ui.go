@@ -3,8 +3,9 @@ package ui
 import (
 	"context"
 	"fmt"
-	"mangaka/internal/service"
-	"mangaka/pkg/models"
+
+	"github.com/dvsalvaya/mangaka/internal/service"
+	"github.com/dvsalvaya/mangaka/pkg/models"
 
 	"github.com/manifoldco/promptui"
 )

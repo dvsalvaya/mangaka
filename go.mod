@@ -1,4 +1,4 @@
-module mangaka
+module github.com/dvsalvaya/mangaka
 
 go 1.25.0
 

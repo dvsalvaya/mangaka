@@ -16,18 +16,35 @@ Uma CLI interativa para ler mangás diretamento no terminal, usando a API do **M
     -   *Linux*: `sudo apt install zathura zathura-cb`
     -   *Windows*: Instale via MSYS2 ou WSL, ou certifique-se de que o executável `zathura` está acessível no cmd.
 
-## 🎮 Como Usar
+## 📦 Instalação via GitHub
 
-1.  **Rodar**:
+Para instalar DIRETAMENTE do repositório, sem precisar baixar o código manualmente:
+
+1.  **Instale com Go**:
     ```bash
-    go mod tidy
-    go run cmd/mangaka/main.go
+    go install github.com/dvsalvaya/mangaka/cmd/mangaka@latest
     ```
 
-2.  **Navegar**:
-    -   `Search Manga` -> Digite o nome -> Selecione.
-    -   `List Chapters` -> Escolha o capítulo.
-    -   O Mangaka irá baixar as páginas, criar um arquivo `.cbz` temporário e abrir o Zathura.
+2.  **Verifique o PATH**:
+    Certifique-se de que a pasta de binários do Go está no seu PATH.
+    -   *Geralmente*: `%USERPROFILE%\go\bin` (Windows) ou `$HOME/go/bin` (Linux/Mac).
+
+3.  **Use**:
+    Agora você pode digitar apenas:
+    ```bash
+    mangaka
+    ```
+
+## 🎮 Como Usar (Código Fonte)
+
+Se preferir rodar localmente para desenvolvimento:
+
+```bash
+git clone https://github.com/dvsalvaya/mangaka.git
+cd mangaka
+go mod tidy
+go run cmd/mangaka/main.go
+```
 
 ## ⚠️ Notas
 

@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"mangaka/internal/api"
-	"mangaka/internal/downloader"
-	"mangaka/pkg/models"
 	"os"
 	"sync"
+
+	"github.com/dvsalvaya/mangaka/internal/api"
+	"github.com/dvsalvaya/mangaka/internal/downloader"
+	"github.com/dvsalvaya/mangaka/pkg/models"
 )
 
 type MangaService struct {

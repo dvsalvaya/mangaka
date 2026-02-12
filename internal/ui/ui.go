@@ -25,7 +25,7 @@ func (c *CLI) Start() {
 	for {
 		prompt := promptui.Select{
 			Label: "Main Menu",
-			Items: []string{"Search Manga", "My Favorites", "Exit"},
+			Items: []string{"Search Manga", "My Favorites", "My Downloads", "Exit"},
 		}
 
 		_, result, err := prompt.Run()
@@ -39,6 +39,8 @@ func (c *CLI) Start() {
 			c.searchFlow()
 		case "My Favorites":
 			c.favoritesFlow()
+		case "My Downloads":
+			c.downloadsFlow()
 		case "Exit":
 			fmt.Println("Goodbye!")
 			return
@@ -147,7 +149,7 @@ func (c *CLI) mangaDetailsFlow(manga models.MangaData) {
 
 		switch result {
 		case "List Chapters":
-			c.chaptersFlow(manga.ID)
+			c.chaptersFlow(manga)
 		case favLabel:
 			added := c.service.ToggleFavorite(manga)
 			if added {
@@ -161,9 +163,9 @@ func (c *CLI) mangaDetailsFlow(manga models.MangaData) {
 	}
 }
 
-func (c *CLI) chaptersFlow(mangaID string) {
+func (c *CLI) chaptersFlow(manga models.MangaData) {
 	fmt.Println("Fetching chapters...")
-	chapters, err := c.service.GetMangaChapters(context.Background(), mangaID)
+	chapters, err := c.service.GetMangaChapters(context.Background(), manga.ID)
 	if err != nil {
 		fmt.Printf("Error getting chapters: %v\n", err)
 		return
@@ -203,11 +205,86 @@ func (c *CLI) chaptersFlow(mangaID string) {
 		return
 	}
 
+	actionPrompt := promptui.Select{
+		Label: fmt.Sprintf("Chapter: %s", selectedChapter.Title),
+		Items: []string{"Read Online", "Download", "Cancel"},
+	}
+
+	_, action, err := actionPrompt.Run()
+	if err != nil || action == "Cancel" {
+		return
+	}
+
+	if action == "Download" {
+		fmt.Printf("Downloading '%s'...\n", selectedChapter.Title)
+		path, err := c.service.DownloadChapter(context.Background(), selectedChapter, manga)
+		if err != nil {
+			fmt.Printf("Error downloading: %v\n", err)
+		} else {
+			fmt.Printf("Downloaded to %s\n", path)
+		}
+		c.waitForKey()
+		return
+	}
+
+	// Read Online
 	fmt.Printf("Downloading and opening '%s'...\n", selectedChapter.Title)
 
 	err = c.service.ReadChapter(context.Background(), selectedChapter.ID)
 	if err != nil {
 		fmt.Printf("Error reading chapter: %v\n", err)
+	}
+}
+
+func (c *CLI) downloadsFlow() {
+	downloads, err := c.service.ListDownloads()
+	if err != nil {
+		fmt.Printf("Error listing downloads: %v\n", err)
+		return
+	}
+
+	if len(downloads) == 0 {
+		fmt.Println("No downloads found.")
+		return
+	}
+
+	mangaTitles := make([]string, 0, len(downloads))
+	for title := range downloads {
+		mangaTitles = append(mangaTitles, title)
+	}
+	mangaTitles = append(mangaTitles, "<< Back to Main Menu")
+
+	prompt := promptui.Select{
+		Label: "My Downloads",
+		Items: mangaTitles,
+	}
+
+	idx, result, err := prompt.Run()
+	if err != nil || result == "<< Back to Main Menu" {
+		return
+	}
+
+	selectedManga := mangaTitles[idx]
+	chapters := downloads[selectedManga]
+
+	// Add Back option
+	chapters = append(chapters, "<< Back")
+
+	chapPrompt := promptui.Select{
+		Label: fmt.Sprintf("Downloads for %s", selectedManga),
+		Items: chapters,
+	}
+
+	_, cResult, err := chapPrompt.Run()
+	if err != nil || cResult == "<< Back" {
+		return
+	}
+
+	// Read
+	err = c.service.ReadDownloaded(selectedManga, cResult)
+	if err != nil {
+		fmt.Printf("Error reading file: %v\n", err)
+		c.waitForKey()
 	}
 }
 

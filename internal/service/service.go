@@ -52,6 +52,50 @@ func (s *MangaService) ReadChapter(ctx context.Context, chapterID string) error 
 	return s.downloader.DownloadAndRead(chapterID, urls)
 }
 
+func (s *MangaService) DownloadChapter(ctx context.Context, chapter models.Chapter, manga models.MangaData) (string, error) {
+	urls, err := s.client.GetChapterPages(ctx, chapter.ID)
+	if err != nil {
+		return "", err
+	}
+	if len(urls) == 0 {
+		return "", fmt.Errorf("no pages found for chapter")
+	}
+
+	mangaTitle := manga.Attributes.Title["en"]
+	if mangaTitle == "" {
+		for _, t := range manga.Attributes.Title {
+			mangaTitle = t
+			break
+		}
+	}
+	if mangaTitle == "" {
+		mangaTitle = "Unknown Manga"
+	}
+
+	return s.downloader.DownloadChapter(chapter.ID, urls, chapter.Title, mangaTitle)
+}
+
+func (s *MangaService) ListDownloads() (map[string][]string, error) {
+	return s.downloader.ListDownloads()
+}
+
+func (s *MangaService) ReadDownloaded(mangaTitle, chapterFile string) error {
+	// Construct path or use downloader to find it
+	// Since ListDownloads returns filenames, and we know BaseDir structure
+	// We can reconstruct path: BaseDir/MangaTitle/ChapterFile
+	// But Service shouldn't know about BaseDir path details ideally.
+	// Either modify ListDownloads to return full paths, or add ReadLocal(manga, chapter) to downloader.
+	// Let's use filepath.Join here assuming standard structure or add a method in downloader.
+	// For now, let's construct it here as we don't have GetPath in downloader interface yet.
+	// Wait, downloader.ReadCBZ takes a path.
+	// I'll add a helper in service to build path, or just use relative path?
+	// The downloader is in internal/downloader, service in internal/service.
+	// I can use `downloader.DownloadDir` constant if exported? It was `const DownloadDir = "downloads"`.
+	// I didn't export it (captital D). I did `const DownloadDir`. Yes, it is exported.
+	path := fmt.Sprintf("%s/%s/%s", downloader.DownloadDir, mangaTitle, chapterFile)
+	return s.downloader.ReadCBZ(path)
+}
+
 func (s *MangaService) ToggleFavorite(manga models.MangaData) bool {
 	s.favMu.Lock()
 	defer s.favMu.Unlock()
